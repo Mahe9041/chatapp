@@ -1,0 +1,342 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins'    as *;
+@use 'sass:color';
+
+// ── Page layout ───────────────────────────────────────────────────────────────
+
+.demoLayout {
+  display:               grid;
+  grid-template-columns: 1fr 380px 1fr;
+  height:                100vh;
+  overflow:              hidden;
+  background:            $color-neutral-100;
+  gap:                   $spacing-3;
+  padding:               $spacing-3;
+}
+
+// ── Chat panels ───────────────────────────────────────────────────────────────
+
+.panel {
+  display:        flex;
+  flex-direction: column;
+  background:     #fff;
+  border:         1px solid $color-neutral-200;
+  border-radius:  $radius-lg;
+  overflow:       hidden;
+  transition:     opacity $transition-normal;
+}
+
+.panelOffline {
+  opacity: 0.55;
+  filter:  grayscale(0.4);
+}
+
+.panelHeader {
+  @include flex-row($spacing-3);
+  justify-content: space-between;
+  padding:         $spacing-3 $spacing-4;
+  border-bottom:   1px solid $color-neutral-200;
+  background:      $color-neutral-50;
+}
+
+.panelTitle {
+  font-size:   $font-size-base;
+  font-weight: $font-weight-semibold;
+  color:       $color-neutral-800;
+}
+
+.panelStatus {
+  @include flex-row($spacing-2);
+  font-size: $font-size-sm;
+  color:     $color-neutral-500;
+}
+
+.statusDot {
+  width:         8px;
+  height:        8px;
+  border-radius: $radius-full;
+}
+
+.online  { background: $color-success; }
+.offline { background: $color-neutral-400; }
+
+.toggleBtn {
+  padding:       $spacing-1 $spacing-3;
+  font-size:     $font-size-xs;
+  font-weight:   $font-weight-medium;
+  color:         $color-brand-primary;
+  background:    $color-brand-primary-light;
+  border:        none;
+  border-radius: $radius-full;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+
+  &:hover { background: color.adjust($color-brand-primary-light, $lightness: -5%); }
+}
+
+.panelMessages {
+  flex:           1;
+  overflow-y:     auto;
+  padding:        $spacing-4;
+  display:        flex;
+  flex-direction: column;
+  gap:            $spacing-2;
+  @include custom-scrollbar;
+}
+
+.panelBubble {
+  max-width:     75%;
+  padding:       $spacing-2 $spacing-3;
+  border-radius: $radius-lg;
+  word-break:    break-word;
+}
+
+.ownBubble {
+  align-self:                flex-end;
+  background:                $color-bubble-outgoing;
+  color:                     $color-bubble-outgoing-text;
+  border-bottom-right-radius:$radius-sm;
+}
+
+.otherBubble {
+  align-self:               flex-start;
+  background:               $color-bubble-incoming;
+  color:                    $color-bubble-incoming-text;
+  border-bottom-left-radius:$radius-sm;
+}
+
+.bubbleText {
+  font-size:   $font-size-base;
+  line-height: 1.4;
+  margin:      0;
+}
+
+.bubbleTime {
+  font-size:  $font-size-xs;
+  opacity:    0.65;
+  margin-top: $spacing-1;
+  text-align: right;
+}
+
+.panelInput {
+  @include flex-row($spacing-2);
+  padding:    $spacing-3 $spacing-4;
+  border-top: 1px solid $color-neutral-200;
+  background: $color-neutral-50;
+}
+
+.inputField {
+  flex:          1;
+  padding:       $spacing-2 $spacing-3;
+  font-size:     $font-size-base;
+  background:    #fff;
+  border:        1px solid $color-neutral-300;
+  border-radius: $radius-full;
+  outline:       none;
+
+  &:focus { border-color: $color-brand-primary; }
+}
+
+.sendBtn {
+  padding:       $spacing-2 $spacing-4;
+  font-size:     $font-size-sm;
+  font-weight:   $font-weight-semibold;
+  color:         #fff;
+  background:    $color-brand-primary;
+  border:        none;
+  border-radius: $radius-full;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+
+  &:hover:not(:disabled) { background: $color-brand-primary-dark; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Centre panel ──────────────────────────────────────────────────────────────
+
+.centre {
+  display:        flex;
+  flex-direction: column;
+  gap:            $spacing-3;
+  overflow-y:     auto;
+  @include custom-scrollbar;
+}
+
+.centreHeader {
+  font-size:   $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color:       $color-neutral-800;
+  text-align:  center;
+  padding:     $spacing-2 0;
+}
+
+.sectionLabel {
+  font-size:      $font-size-xs;
+  font-weight:    $font-weight-semibold;
+  color:          $color-neutral-500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top:     $spacing-2;
+}
+
+// ── Flow diagram ──────────────────────────────────────────────────────────────
+
+.flowDiagram {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  padding:        $spacing-4;
+  background:     #fff;
+  border:         1px solid $color-neutral-200;
+  border-radius:  $radius-lg;
+}
+
+.flowNode {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            $spacing-1;
+  opacity:        0.3;
+  transition:     opacity $transition-normal;
+  width:          100%;
+  text-align:     center;
+  padding:        $spacing-2;
+}
+
+.flowNodeActive {
+  opacity: 1;
+
+  .flowNodeDot {
+    background: var(--node-color);
+    box-shadow: 0 0 8px var(--node-color);
+  }
+}
+
+.flowNodeDot {
+  width:         12px;
+  height:        12px;
+  border-radius: $radius-full;
+  background:    $color-neutral-300;
+  transition:    background $transition-normal, box-shadow $transition-normal;
+}
+
+.flowNodeLabel {
+  font-size:   $font-size-sm;
+  font-weight: $font-weight-medium;
+  color:       $color-neutral-700;
+}
+
+.flowNodeTime {
+  font-size:   $font-size-xs;
+  color:       $color-neutral-500;
+  font-family: $font-mono;
+}
+
+.flowArrow {
+  width:      2px;
+  height:     20px;
+  background: $color-neutral-200;
+  transition: background $transition-normal;
+}
+
+.flowArrowActive { background: $color-brand-primary; }
+
+// ── Latency table ─────────────────────────────────────────────────────────────
+
+.latencyTable {
+  background:    #fff;
+  border:        1px solid $color-neutral-200;
+  border-radius: $radius-lg;
+  overflow:      hidden;
+  font-size:     $font-size-sm;
+}
+
+.latencyHeader {
+  display:               grid;
+  grid-template-columns: 1fr auto auto;
+  gap:                   $spacing-4;
+  padding:               $spacing-2 $spacing-4;
+  background:            $color-neutral-50;
+  font-weight:           $font-weight-semibold;
+  color:                 $color-neutral-600;
+  border-bottom:         1px solid $color-neutral-200;
+  font-size:             $font-size-xs;
+  text-transform:        uppercase;
+}
+
+.latencyRow {
+  display:               grid;
+  grid-template-columns: 1fr auto auto;
+  gap:                   $spacing-4;
+  padding:               $spacing-2 $spacing-4;
+  border-bottom:         1px solid $color-neutral-100;
+  align-items:           center;
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.latencyStage    { color: $color-neutral-700; }
+.latencyDuration { color: $color-brand-primary; font-family: $font-mono; text-align: right; }
+.latencyTotal    { color: $color-neutral-500; font-family: $font-mono; text-align: right; }
+
+.latencyFooter {
+  padding:    $spacing-2 $spacing-4;
+  text-align: right;
+  font-size:  $font-size-sm;
+  color:      $color-neutral-600;
+  background: $color-neutral-50;
+  border-top: 1px solid $color-neutral-200;
+
+  strong { color: $color-neutral-900; }
+}
+
+.latencyEmpty {
+  padding:       $spacing-6;
+  text-align:    center;
+  font-size:     $font-size-sm;
+  color:         $color-neutral-400;
+  background:    #fff;
+  border:        1px solid $color-neutral-200;
+  border-radius: $radius-lg;
+}
+
+// ── WebSocket event log ───────────────────────────────────────────────────────
+
+.eventLog {
+  background:    #0f1117;
+  border-radius: $radius-lg;
+  padding:       $spacing-3;
+  height:        180px;
+  overflow-y:    auto;
+  @include custom-scrollbar(4px);
+}
+
+.eventLogEmpty {
+  font-size:   $font-size-sm;
+  color:       #555;
+  font-family: $font-mono;
+}
+
+.eventLogEntry {
+  font-size:   $font-size-xs;
+  font-family: $font-mono;
+  color:       #a8d9a7;
+  line-height: 1.8;
+  white-space: pre;
+}
+
+// ── Loading / error states ────────────────────────────────────────────────────
+
+.loading {
+  @include flex-center;
+  height:    100vh;
+  font-size: $font-size-lg;
+  color:     $color-neutral-500;
+}
+
+.errorState {
+  @include flex-center;
+  height:    100vh;
+  font-size: $font-size-base;
+  color:     $color-error;
+}

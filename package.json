@@ -1,0 +1,16 @@
+{
+  "name": "chatapp",
+  "private": true,
+  "workspaces": ["client", "server", "shared"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w shared && npm run build -w server && npm run build -w client",
+    "lint": "npm run lint -w client && npm run lint -w server",
+    "type-check": "npm run type-check -w client && npm run type-check -w server",
+    "tokens:build": "tsx client/scripts/build-tokens.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "tsx": "^4.7.0"
+  }
+}

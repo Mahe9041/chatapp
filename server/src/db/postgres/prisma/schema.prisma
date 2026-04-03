@@ -1,0 +1,126 @@
+// =============================================================================
+// Prisma Schema — ChatApp
+// Database: PostgreSQL (via Supabase free tier)
+// Run `npm run db:generate` after any change
+// Run `npm run db:migrate` to apply changes to the database
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+/// Role a member holds within a conversation.
+/// ADMIN  → full control (add/remove/edit group, send messages)
+/// WRITE  → send messages and media
+/// READ   → view messages only, cannot send
+enum MemberRole {
+  ADMIN
+  WRITE
+  READ
+}
+
+// =============================================================================
+// MODELS
+// =============================================================================
+
+/// Core user identity. Credentials + presence state live here.
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  avatarUrl    String?  @map("avatar_url")
+
+  /// Managed by the presence module via Redis + DB sync
+  isOnline     Boolean  @default(false) @map("is_online")
+  lastSeen     DateTime @default(now()) @map("last_seen")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt      @map("updated_at")
+
+  // ── Relations ──────────────────────────────────────────────
+  refreshTokens      RefreshToken[]
+  conversationMember ConversationMember[]
+  blockedBy          BlockedUser[]        @relation("blocker")
+  blocking           BlockedUser[]        @relation("blocked")
+
+  @@map("users")
+}
+
+/// Stores hashed refresh tokens. One user can have multiple
+/// active sessions (e.g. phone + desktop).
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+/// A conversation is either a 1-to-1 DIRECT chat or a named GROUP.
+/// Message documents (MongoDB) reference this ID.
+model Conversation {
+  id        String           @id @default(uuid())
+  type      ConversationType
+  name      String?          // null for DIRECT conversations
+  avatarUrl String?          @map("avatar_url")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt      @map("updated_at")
+
+  members   ConversationMember[]
+
+  @@map("conversations")
+}
+
+/// Junction table: which users are in which conversations, with what role.
+/// `lastReadAt` drives unread count calculation.
+model ConversationMember {
+  id             String    @id @default(uuid())
+  conversationId String    @map("conversation_id")
+  userId         String    @map("user_id")
+  role           MemberRole @default(WRITE)
+  joinedAt       DateTime   @default(now()) @map("joined_at")
+  lastReadAt     DateTime   @default(now()) @map("last_read_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Ensures a user can only appear once per conversation
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_members")
+}
+
+/// Tracks which users have blocked which other users.
+/// Both sides checked before delivering messages or showing presence.
+model BlockedUser {
+  blockerId String   @map("blocker_id")
+  blockedId String   @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  blocker User @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@map("blocked_users")
+}

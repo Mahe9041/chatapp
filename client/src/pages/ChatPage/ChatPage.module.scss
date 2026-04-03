@@ -1,0 +1,545 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins'    as *;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+.layout {
+  display:               grid;
+  grid-template-columns: 300px 1fr;
+  height:                100vh;
+  overflow:              hidden;
+  background:            $color-neutral-100;
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+.avatar {
+  position:      relative;
+  @include flex-center;
+  border-radius: $radius-full;
+  background:    $color-brand-primary;
+  color:         #fff;
+  font-weight:   $font-weight-semibold;
+  flex-shrink:   0;
+}
+
+.avatar_sm { width: 32px; height: 32px; font-size: $font-size-sm; }
+.avatar_md { width: 44px; height: 44px; font-size: $font-size-lg; }
+.avatar_lg { width: 52px; height: 52px; font-size: $font-size-xl; }
+
+.onlineDot {
+  position:      absolute;
+  bottom:        1px;
+  right:         1px;
+  width:         10px;
+  height:        10px;
+  border-radius: $radius-full;
+  border:        2px solid #fff;
+}
+
+.online  { background: $color-success; }
+.offline { background: $color-neutral-400; }
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+.sidebar {
+  display:        flex;
+  flex-direction: column;
+  background:     #fff;
+  border-right:   1px solid $color-neutral-200;
+  overflow:       hidden;
+}
+
+.sidebarHeader {
+  @include flex-row($spacing-2);
+  justify-content: space-between;
+  padding:         $spacing-4;
+  border-bottom:   1px solid $color-neutral-200;
+  flex-shrink:     0;
+}
+
+.sidebarTitle {
+  font-size:   $font-size-xl;
+  font-weight: $font-weight-bold;
+  color:       $color-neutral-900;
+}
+
+.newChatBtn {
+  @include flex-center;
+  width:         32px;
+  height:        32px;
+  border-radius: $radius-full;
+  border:        none;
+  background:    $color-neutral-100;
+  font-size:     $font-size-base;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+
+  &:hover { background: $color-neutral-200; }
+}
+
+.currentUser {
+  @include flex-row($spacing-2);
+  padding:       $spacing-3 $spacing-4;
+  border-bottom: 1px solid $color-neutral-100;
+  flex-shrink:   0;
+}
+
+.userName {
+  flex:        1;
+  font-size:   $font-size-sm;
+  font-weight: $font-weight-medium;
+  color:       $color-neutral-700;
+  @include truncate;
+}
+
+.logoutBtn {
+  padding:       $spacing-1 $spacing-2;
+  font-size:     $font-size-xs;
+  color:         $color-neutral-500;
+  background:    none;
+  border:        1px solid $color-neutral-200;
+  border-radius: $radius-sm;
+  cursor:        pointer;
+  white-space:   nowrap;
+  transition:    all $transition-fast;
+
+  &:hover { background: $color-neutral-100; color: $color-neutral-700; }
+}
+
+.convoList {
+  flex:       1;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+.hint {
+  padding:    $spacing-4;
+  text-align: center;
+  font-size:  $font-size-sm;
+  color:      $color-neutral-400;
+}
+
+.emptyConvos {
+  @include flex-center;
+  flex-direction: column;
+  gap:            $spacing-3;
+  padding:        $spacing-8 $spacing-4;
+  text-align:     center;
+  color:          $color-neutral-400;
+  font-size:      $font-size-sm;
+}
+
+// ── Conversation item ─────────────────────────────────────────────────────────
+
+.convoItem {
+  @include flex-row($spacing-3);
+  padding:       $spacing-3 $spacing-4;
+  cursor:        pointer;
+  border-bottom: 1px solid $color-neutral-100;
+  transition:    background $transition-fast;
+
+  &:hover { background: $color-neutral-50; }
+}
+
+.convoItemActive {
+  background: $color-brand-primary-light;
+  &:hover     { background: $color-brand-primary-light; }
+}
+
+.convoInfo {
+  flex:      1;
+  min-width: 0;
+}
+
+.convoName {
+  font-size:   $font-size-base;
+  font-weight: $font-weight-medium;
+  color:       $color-neutral-900;
+  @include truncate;
+}
+
+.lastMsg {
+  font-size:  $font-size-sm;
+  color:      $color-neutral-500;
+  margin-top: 2px;
+  @include truncate;
+}
+
+// ── Main panel ────────────────────────────────────────────────────────────────
+
+.main {
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  background:     #fff;
+}
+
+.chatHeader {
+  @include flex-row($spacing-3);
+  padding:       $spacing-3 $spacing-5;
+  border-bottom: 1px solid $color-neutral-200;
+  flex-shrink:   0;
+  background:    #fff;
+}
+
+.chatName {
+  font-size:   $font-size-base;
+  font-weight: $font-weight-semibold;
+  color:       $color-neutral-900;
+}
+
+.chatStatus {
+  font-size:  $font-size-sm;
+  color:      $color-neutral-500;
+  margin-top: 1px;
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+
+.messageList {
+  flex:           1;
+  overflow-y:     auto;
+  padding:        $spacing-4 $spacing-5;
+  display:        flex;
+  flex-direction: column;
+  gap:            $spacing-1;
+  @include custom-scrollbar;
+}
+
+.bubbleWrap   { display: flex; margin-bottom: $spacing-1; }
+.ownWrap      { justify-content: flex-end; }
+.otherWrap    { justify-content: flex-start; }
+
+.bubble {
+  max-width:     68%;
+  padding:       $spacing-2 $spacing-3;
+  border-radius: $radius-lg;
+  word-break:    break-word;
+}
+
+.ownBubble {
+  background:                $color-bubble-outgoing;
+  color:                     $color-bubble-outgoing-text;
+  border-bottom-right-radius:$radius-sm;
+}
+
+.otherBubble {
+  background:               $color-bubble-incoming;
+  color:                    $color-bubble-incoming-text;
+  border-bottom-left-radius:$radius-sm;
+}
+
+.deletedBubble {
+  background: $color-neutral-100;
+  color:      $color-neutral-400;
+  font-style: italic;
+}
+
+.bubbleText {
+  font-size:   $font-size-base;
+  line-height: 1.45;
+  margin:      0;
+}
+
+.bubbleMeta {
+  @include flex-row($spacing-1);
+  justify-content: flex-end;
+  margin-top:      $spacing-1;
+  opacity:         0.7;
+}
+
+.bubbleTime  { font-size: $font-size-xs; }
+.editedTag   { font-size: $font-size-xs; font-style: italic; }
+
+.ticks       { font-size: $font-size-xs; color: inherit; }
+.ticksRead   { color: $color-read-receipt-seen; opacity: 1; }
+
+// ── Typing indicator ──────────────────────────────────────────────────────────
+
+.typingWrap {
+  @include flex-row($spacing-2);
+  padding:    $spacing-1 0;
+  min-height: 24px;
+}
+
+.typingDots {
+  @include flex-row($spacing-1);
+
+  span {
+    display:       block;
+    width:         6px;
+    height:        6px;
+    border-radius: $radius-full;
+    background:    $color-typing-dot;
+    animation:     bounce 1.2s infinite ease-in-out;
+
+    &:nth-child(2) { animation-delay: 0.15s; }
+    &:nth-child(3) { animation-delay: 0.30s; }
+  }
+}
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-5px); }
+}
+
+.typingText {
+  font-size: $font-size-xs;
+  color:     $color-neutral-500;
+}
+
+// ── Input area ────────────────────────────────────────────────────────────────
+
+.inputArea {
+  @include flex-row($spacing-2);
+  padding:    $spacing-3 $spacing-4;
+  border-top: 1px solid $color-neutral-200;
+  background: #fff;
+  flex-shrink:0;
+}
+
+.input {
+  flex:          1;
+  padding:       $spacing-2 $spacing-3;
+  font-size:     $font-size-base;
+  background:    $color-neutral-50;
+  border:        1px solid $color-neutral-200;
+  border-radius: $radius-lg;
+  outline:       none;
+  resize:        none;
+  line-height:   1.45;
+  max-height:    100px;
+  overflow-y:    auto;
+  font-family:   $font-sans;
+
+  &:focus        { border-color: $color-brand-primary; }
+  &::placeholder { color: $color-neutral-400; }
+}
+
+.sendBtn {
+  padding:       $spacing-2 $spacing-5;
+  font-size:     $font-size-sm;
+  font-weight:   $font-weight-semibold;
+  color:         #fff;
+  background:    $color-brand-primary;
+  border:        none;
+  border-radius: $radius-lg;
+  cursor:        pointer;
+  flex-shrink:   0;
+  transition:    background $transition-fast;
+
+  &:hover:not(:disabled) { background: $color-brand-primary-dark; }
+  &:disabled             { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Empty main ────────────────────────────────────────────────────────────────
+
+.emptyMain {
+  @include flex-center;
+  flex-direction: column;
+  gap:            $spacing-4;
+  height:         100%;
+  color:          $color-neutral-400;
+}
+
+.emptyIcon { font-size: 56px; }
+.emptyText { font-size: $font-size-base; }
+
+.startBtn {
+  padding:       $spacing-2 $spacing-5;
+  font-size:     $font-size-sm;
+  font-weight:   $font-weight-semibold;
+  color:         #fff;
+  background:    $color-brand-primary;
+  border:        none;
+  border-radius: $radius-lg;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+
+  &:hover { background: $color-brand-primary-dark; }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+
+.modalOverlay {
+  position:        fixed;
+  inset:           0;
+  background:      rgba(0, 0, 0, 0.4);
+  @include flex-center;
+  z-index:         $z-modal;
+  padding:         $spacing-4;
+}
+
+.modal {
+  background:    #fff;
+  border-radius: $radius-xl;
+  width:         100%;
+  max-width:     480px;
+  max-height:    80vh;
+  display:       flex;
+  flex-direction:column;
+  overflow:      hidden;
+  box-shadow:    $shadow-lg;
+}
+
+.modalHeader {
+  @include flex-row($spacing-2);
+  justify-content: space-between;
+  padding:         $spacing-4 $spacing-5;
+  border-bottom:   1px solid $color-neutral-200;
+  flex-shrink:     0;
+}
+
+.modalTitle {
+  font-size:   $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color:       $color-neutral-900;
+}
+
+.modalClose {
+  @include flex-center;
+  width:         28px;
+  height:        28px;
+  border-radius: $radius-full;
+  border:        none;
+  background:    $color-neutral-100;
+  color:         $color-neutral-600;
+  cursor:        pointer;
+  font-size:     $font-size-sm;
+
+  &:hover { background: $color-neutral-200; }
+}
+
+.modalTabs {
+  @include flex-row(0);
+  border-bottom: 1px solid $color-neutral-200;
+  flex-shrink:   0;
+}
+
+.modalTab {
+  flex:          1;
+  padding:       $spacing-3;
+  font-size:     $font-size-sm;
+  font-weight:   $font-weight-medium;
+  color:         $color-neutral-500;
+  background:    none;
+  border:        none;
+  border-bottom: 2px solid transparent;
+  cursor:        pointer;
+  transition:    all $transition-fast;
+
+  &:hover { color: $color-neutral-700; }
+}
+
+.modalTabActive {
+  color:               $color-brand-primary;
+  border-bottom-color: $color-brand-primary;
+}
+
+.modalInput {
+  margin:        $spacing-3 $spacing-4 0;
+  padding:       $spacing-2 $spacing-3;
+  font-size:     $font-size-base;
+  border:        1px solid $color-neutral-300;
+  border-radius: $radius-md;
+  outline:       none;
+  font-family:   $font-sans;
+
+  &:focus        { border-color: $color-brand-primary; }
+  &::placeholder { color: $color-neutral-400; }
+}
+
+.selectedPills {
+  @include flex-row($spacing-2);
+  flex-wrap:  wrap;
+  padding:    $spacing-2 $spacing-4 0;
+  flex-shrink:0;
+}
+
+.pill {
+  @include flex-row($spacing-1);
+  padding:       $spacing-1 $spacing-2;
+  background:    $color-brand-primary-light;
+  color:         $color-brand-primary;
+  border-radius: $radius-full;
+  font-size:     $font-size-xs;
+  font-weight:   $font-weight-medium;
+
+  button {
+    background: none;
+    border:     none;
+    color:      inherit;
+    cursor:     pointer;
+    font-size:  $font-size-xs;
+    padding:    0;
+    line-height:1;
+  }
+}
+
+.searchResults {
+  flex:       1;
+  overflow-y: auto;
+  padding:    $spacing-2 $spacing-2;
+  @include custom-scrollbar;
+}
+
+.searchHint {
+  padding:    $spacing-4;
+  text-align: center;
+  font-size:  $font-size-sm;
+  color:      $color-neutral-400;
+}
+
+.searchResult {
+  @include flex-row($spacing-3);
+  padding:       $spacing-2 $spacing-3;
+  border-radius: $radius-md;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+
+  &:hover { background: $color-neutral-50; }
+}
+
+.searchResultSelected {
+  background: $color-brand-primary-light;
+  &:hover    { background: $color-brand-primary-light; }
+}
+
+.searchResultInfo { flex: 1; min-width: 0; }
+
+.searchResultName {
+  font-size:   $font-size-sm;
+  font-weight: $font-weight-medium;
+  color:       $color-neutral-900;
+  @include truncate;
+}
+
+.searchResultEmail {
+  font-size: $font-size-xs;
+  color:     $color-neutral-500;
+  @include truncate;
+}
+
+.checkmark {
+  color:       $color-brand-primary;
+  font-weight: $font-weight-bold;
+  font-size:   $font-size-base;
+}
+
+.createBtn {
+  margin:        $spacing-3 $spacing-4 $spacing-4;
+  padding:       $spacing-3;
+  font-size:     $font-size-base;
+  font-weight:   $font-weight-semibold;
+  color:         #fff;
+  background:    $color-brand-primary;
+  border:        none;
+  border-radius: $radius-md;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+  flex-shrink:   0;
+
+  &:hover:not(:disabled) { background: $color-brand-primary-dark; }
+  &:disabled             { opacity: 0.5; cursor: not-allowed; }
+}
