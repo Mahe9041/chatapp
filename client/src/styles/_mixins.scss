@@ -1,10 +1,12 @@
-// _mixins.scss must import variables itself — SCSS modules don't auto-cascade
-@use 'variables' as *;
+// _mixins.scss
+// All mixins are self-contained — no @use imports needed.
+// Hardcoded values match tokens.json exactly.
+// This avoids SCSS @use scoping issues with Vite's additionalData injection.
+
 @use 'sass:map';
 @use 'sass:color';
 
 /// Responsive breakpoint helper
-/// @param {String} $bp - 'sm' (640) | 'md' (768) | 'lg' (1024) | 'xl' (1280)
 @mixin respond-to($bp) {
   $breakpoints: ('sm': 640px, 'md': 768px, 'lg': 1024px, 'xl': 1280px);
   @media (min-width: map.get($breakpoints, $bp)) { @content; }
@@ -18,7 +20,7 @@
 }
 
 /// Flex row with gap
-@mixin flex-row($gap: $spacing-2) {
+@mixin flex-row($gap: 8px) {
   display:     flex;
   align-items: center;
   gap:         $gap;
@@ -52,26 +54,26 @@
   border:     0;
 }
 
-/// Custom scrollbar
+/// Custom scrollbar — hardcoded neutral-300 (#D4D4D8)
 @mixin custom-scrollbar($width: 4px) {
   &::-webkit-scrollbar       { width: $width; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
-    background:    $color-neutral-300;
-    border-radius: $radius-full;
+    background:    #D4D4D8;
+    border-radius: 9999px;
   }
 }
 
-/// Card surface
+/// Card surface — hardcoded neutral-200 (#E4E4E7)
 @mixin card-surface {
   background:    #fff;
-  border:        1px solid $color-neutral-200;
-  border-radius: $radius-lg;
-  box-shadow:    $shadow-sm;
+  border:        1px solid #E4E4E7;
+  border-radius: 12px;
+  box-shadow:    0 1px 2px rgba(0,0,0,0.06);
 }
 
-/// Focus ring
+/// Focus ring — hardcoded brand primary (#6C63FF)
 @mixin focus-ring {
-  outline:        2px solid $color-brand-primary;
+  outline:        2px solid #6C63FF;
   outline-offset: 2px;
 }

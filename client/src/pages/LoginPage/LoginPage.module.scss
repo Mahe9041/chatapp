@@ -1,25 +1,18 @@
-// =============================================================================
-// LoginPage.module.scss
-// All values reference $variables from the centralised token system.
-// No hardcoded hex values, spacing numbers, or magic strings.
-// =============================================================================
-
-
-@use '../../styles/variables' as *;
-@use '../../styles/mixins'    as *;
+// Variables and mixins are auto-injected via vite.config.ts additionalData
+// Do NOT add @use imports here — they cause double-import errors
 
 .page {
   @include flex-center;
-  min-height: 100vh;
-  background: $color-neutral-100;
-  padding: $spacing-4;
+  min-height:  100vh;
+  background:  $color-neutral-100;
+  padding:     $spacing-4;
 }
 
 .card {
   @include card-surface;
-  width: 100%;
+  width:     100%;
   max-width: 420px;
-  padding: $spacing-8;
+  padding:   $spacing-8;
 
   @include respond-to('sm') {
     padding: $spacing-10;
@@ -29,139 +22,143 @@
 .brand {
   @include flex-center;
   flex-direction: column;
-  gap: $spacing-3;
-  margin-bottom: $spacing-6;
+  gap:            $spacing-3;
+  margin-bottom:  $spacing-6;
 }
 
 .brandLogo {
-  width: 48px;
-  height: 48px;
-  background: $color-brand-primary;
+  width:         48px;
+  height:        48px;
+  background:    $color-brand-primary;
   border-radius: $radius-xl;
 }
 
 .brandName {
-  font-size: $font-size-2xl;
+  font-size:   $font-size-2xl;
   font-weight: $font-weight-bold;
-  color: $color-neutral-900;
-  margin: 0;
+  color:       $color-neutral-900;
+  margin:      0;
 }
 
 .tabs {
-  display: flex;
+  display:       flex;
   border-bottom: 1px solid $color-neutral-200;
   margin-bottom: $spacing-6;
 }
 
 .tab {
-  flex: 1;
-  padding: $spacing-2 $spacing-4;
-  font-size: $font-size-base;
-  font-weight: $font-weight-medium;
-  color: $color-neutral-500;
-  background: none;
-  border: none;
+  flex:          1;
+  padding:       $spacing-2 $spacing-4;
+  font-size:     $font-size-base;
+  font-weight:   $font-weight-medium;
+  color:         $color-neutral-500;
+  background:    none;
+  border:        none;
   border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: color $transition-fast, border-color $transition-fast;
+  cursor:        pointer;
+  transition:    color $transition-fast, border-color $transition-fast;
 
   &:hover { color: $color-neutral-700; }
 }
 
 .tabActive {
-  color: $color-brand-primary;
-  border-bottom-color: $color-brand-primary;
+  color:              $color-brand-primary;
+  border-bottom-color:$color-brand-primary;
 }
 
 .form {
-  display: flex;
+  display:        flex;
   flex-direction: column;
-  gap: $spacing-4;
+  gap:            $spacing-4;
 }
 
 .field {
-  display: flex;
+  display:        flex;
   flex-direction: column;
-  gap: $spacing-1;
+  gap:            $spacing-1;
 }
 
 .label {
-  font-size: $font-size-sm;
+  font-size:   $font-size-sm;
   font-weight: $font-weight-medium;
-  color: $color-neutral-700;
+  color:       $color-neutral-700;
 }
 
 .input {
-  width: 100%;
-  padding: $spacing-3 $spacing-4;
-  font-size: $font-size-base;
-  color: $color-neutral-900;
-  background: $color-neutral-50;
-  border: 1px solid $color-neutral-300;
+  width:         100%;
+  padding:       $spacing-3 $spacing-4;
+  font-size:     $font-size-base;
+  color:         $color-neutral-900;
+  background:    $color-neutral-50;
+  border:        1px solid $color-neutral-300;
   border-radius: $radius-md;
-  outline: none;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
-  box-sizing: border-box;
+  outline:       none;
+  transition:    border-color $transition-fast, box-shadow $transition-fast;
+  box-sizing:    border-box;
 
   &:focus {
     border-color: $color-brand-primary;
-    box-shadow: 0 0 0 3px $color-brand-primary-light;
+    box-shadow:   0 0 0 3px $color-brand-primary-light;
   }
 
   &::placeholder { color: $color-neutral-400; }
 
   &:disabled {
     background: $color-neutral-100;
-    cursor: not-allowed;
+    cursor:     not-allowed;
   }
 }
 
 .inputError {
   border-color: $color-error;
-  &:focus { box-shadow: 0 0 0 3px rgba($color-error, 0.15); }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
 }
 
 .fieldError {
   font-size: $font-size-xs;
-  color: $color-error;
+  color:     $color-error;
 }
 
 .errorBanner {
-  padding: $spacing-3 $spacing-4;
-  background: rgba($color-error, 0.08);
-  border: 1px solid rgba($color-error, 0.25);
+  padding:       $spacing-3 $spacing-4;
+  background:    rgba(239, 68, 68, 0.08);
+  border:        1px solid rgba(239, 68, 68, 0.25);
   border-radius: $radius-md;
-  font-size: $font-size-sm;
-  color: $color-error;
+  font-size:     $font-size-sm;
+  color:         $color-error;
 }
 
 .submitButton {
-  width: 100%;
-  padding: $spacing-3;
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: #fff;
-  background: $color-brand-primary;
-  border: none;
+  width:         100%;
+  padding:       $spacing-3;
+  font-size:     $font-size-md;
+  font-weight:   $font-weight-semibold;
+  color:         #fff;
+  background:    $color-brand-primary;
+  border:        none;
   border-radius: $radius-md;
-  cursor: pointer;
-  transition: background $transition-fast, transform $transition-fast;
-  margin-top: $spacing-2;
+  cursor:        pointer;
+  transition:    background $transition-fast, transform $transition-fast;
+  margin-top:    $spacing-2;
 
-  &:hover:not(:disabled) { background: $color-brand-primary-dark; }
-  &:active:not(:disabled) { transform: scale(0.99); }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover:not(:disabled)  { background:  $color-brand-primary-dark; }
+  &:active:not(:disabled) { transform:   scale(0.99); }
+  &:disabled              { opacity: 0.6; cursor: not-allowed; }
 }
 
 .demoLink {
   text-align: center;
-  font-size: $font-size-sm;
-  color: $color-neutral-500;
+  font-size:  $font-size-sm;
+  color:      $color-neutral-500;
 }
 
 .link {
-  color: $color-brand-primary;
+  color:       $color-brand-primary;
   font-weight: $font-weight-medium;
   text-decoration: none;
+
   &:hover { text-decoration: underline; }
 }

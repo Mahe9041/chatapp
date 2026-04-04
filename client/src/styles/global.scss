@@ -1,10 +1,9 @@
 // global.scss — imported ONCE in main.tsx
-// Pulls in all global styles in the correct order
-
-@use 'variables' as *;   // tokens — must be first
-@use 'mixins'    as *;   // depends on variables
-@use 'reset';            // CSS reset
-@use 'typography';       // font scales
+// Variables are auto-injected by vite.config.ts additionalData
+// Only import partials that aren't auto-injected
+@use 'sass:color';
+@use 'reset';
+@use 'typography';
 
 // ── Base ──────────────────────────────────────────────────────────────────────
 *,

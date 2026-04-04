@@ -12,9 +12,12 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        // Makes all SCSS partials available without relative paths
-        // e.g. @use 'variables' works from any .scss file
-        loadPaths: [path.resolve(__dirname, 'src/styles')],
+        // Auto-prepend variables + mixins to every SCSS file
+        // This removes the need for @use imports in every module file
+        additionalData: `
+  @use "${path.resolve(__dirname, 'src/styles/_variables.scss').replace(/\\/g, '/')}" as *;
+  @use "${path.resolve(__dirname, 'src/styles/_mixins.scss').replace(/\\/g, '/')}" as *;
+`,
       },
     },
   },
