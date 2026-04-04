@@ -7,5 +7,4 @@ build/
 logs/
 *.log
 .DS_Store
-client/src/styles/_variables.scss
 prisma/migrations/dev.db

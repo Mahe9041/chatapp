@@ -1,0 +1,91 @@
+// ⚠️  AUTO-GENERATED — DO NOT EDIT MANUALLY
+// Source: src/styles/tokens.json
+// Run `npm run tokens:build` to regenerate
+
+// ── Colors ────────────────────────────────────────────────────────────────────
+$color-brand-primary:        #6C63FF;
+$color-brand-primary-dark:   #5A52E0;
+$color-brand-primary-light:  #EAE8FF;
+
+$color-neutral-50:   #FAFAFA;
+$color-neutral-100:  #F4F4F5;
+$color-neutral-200:  #E4E4E7;
+$color-neutral-300:  #D4D4D8;
+$color-neutral-400:  #A1A1AA;
+$color-neutral-500:  #71717A;
+$color-neutral-600:  #52525B;
+$color-neutral-700:  #3F3F46;
+$color-neutral-800:  #27272A;
+$color-neutral-900:  #18181B;
+
+$color-success: #22C55E;
+$color-warning: #F59E0B;
+$color-error:   #EF4444;
+$color-info:    #3B82F6;
+
+$color-bubble-outgoing:      #6C63FF;
+$color-bubble-outgoing-text: #FFFFFF;
+$color-bubble-incoming:      #F4F4F5;
+$color-bubble-incoming-text: #18181B;
+$color-online-indicator:     #22C55E;
+$color-read-receipt-seen:    #6C63FF;
+$color-typing-dot:           #A1A1AA;
+
+// ── Spacing ───────────────────────────────────────────────────────────────────
+$spacing-1:  4px;
+$spacing-2:  8px;
+$spacing-3:  12px;
+$spacing-4:  16px;
+$spacing-5:  20px;
+$spacing-6:  24px;
+$spacing-8:  32px;
+$spacing-10: 40px;
+$spacing-12: 48px;
+$spacing-16: 64px;
+
+// ── Border radius ─────────────────────────────────────────────────────────────
+$radius-sm:   4px;
+$radius-md:   8px;
+$radius-lg:   12px;
+$radius-xl:   16px;
+$radius-2xl:  24px;
+$radius-full: 9999px;
+
+// ── Typography ────────────────────────────────────────────────────────────────
+$font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-mono: 'JetBrains Mono', monospace;
+
+$font-size-xs:   11px;
+$font-size-sm:   12px;
+$font-size-base: 14px;
+$font-size-md:   15px;
+$font-size-lg:   16px;
+$font-size-xl:   18px;
+$font-size-2xl:  20px;
+$font-size-3xl:  24px;
+
+$font-weight-normal:   400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+$font-weight-bold:     700;
+
+$line-height-tight:   1.25;
+$line-height-normal:  1.5;
+$line-height-relaxed: 1.75;
+
+// ── Shadows ───────────────────────────────────────────────────────────────────
+$shadow-sm:   0 1px 2px rgba(0,0,0,0.06);
+$shadow-md:   0 4px 12px rgba(0,0,0,0.08);
+$shadow-lg:   0 8px 24px rgba(0,0,0,0.12);
+$shadow-chat: 0 2px 8px rgba(0,0,0,0.06);
+
+// ── Transitions ───────────────────────────────────────────────────────────────
+$transition-fast:   100ms ease;
+$transition-normal: 200ms ease;
+$transition-slow:   350ms ease;
+
+// ── Z-index ───────────────────────────────────────────────────────────────────
+$z-dropdown: 100;
+$z-modal:    200;
+$z-toast:    300;
+$z-tooltip:  400;
