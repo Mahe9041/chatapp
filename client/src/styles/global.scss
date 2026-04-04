@@ -1,16 +1,10 @@
 // global.scss — imported ONCE in main.tsx
-// Variables are auto-injected by vite.config.ts additionalData
-// Only import partials that aren't auto-injected
-@use 'sass:color';
-@use 'reset';
-@use 'typography';
+// Variables + mixins are auto-injected by vite.config.ts additionalData
+// No @use statements allowed here — injected content comes first
 
-// ── Base ──────────────────────────────────────────────────────────────────────
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 html {
   font-size:               $font-size-base;
@@ -27,24 +21,26 @@ body {
   color:      $color-neutral-900;
 }
 
-#root {
-  min-height: 100vh;
-}
+#root { min-height: 100vh; }
 
-// ── Utility ───────────────────────────────────────────────────────────────────
+h1 { font-size: $font-size-3xl; font-weight: $font-weight-bold; margin: 0; }
+h2 { font-size: $font-size-2xl; font-weight: $font-weight-semibold; margin: 0; }
+h3 { font-size: $font-size-xl;  font-weight: $font-weight-semibold; margin: 0; }
+
+p  { font-size: $font-size-base; line-height: $line-height-relaxed; margin: 0; }
+
+ul, ol { list-style: none; margin: 0; padding: 0; }
+
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+
+input, button, textarea, select { font: inherit; }
+
 a {
-  color:           $color-brand-primary;
+  color: $color-brand-primary;
   text-decoration: none;
-
   &:hover { text-decoration: underline; }
 }
 
-button {
-  font-family: $font-sans;
-  cursor:      pointer;
-}
-
-input,
-textarea {
-  font-family: $font-sans;
-}
+button { font-family: $font-sans; cursor: pointer; }
+input, textarea { font-family: $font-sans; }
+code, pre { font-family: $font-mono; font-size: $font-size-sm; }

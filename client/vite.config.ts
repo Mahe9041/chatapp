@@ -1,6 +1,14 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
+import react            from '@vitejs/plugin-react';
+import path             from 'path';
+import fs               from 'fs';
+
+const variablesContent = fs.readFileSync(
+  path.resolve(__dirname, 'src/styles/_variables.scss'), 'utf-8'
+);
+const mixinsContent = fs.readFileSync(
+  path.resolve(__dirname, 'src/styles/_mixins.scss'), 'utf-8'
+);
 
 export default defineConfig({
   plugins: [react()],
@@ -12,12 +20,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        // Auto-prepend variables + mixins to every SCSS file
-        // This removes the need for @use imports in every module file
-        additionalData: `
-  @use "${path.resolve(__dirname, 'src/styles/_variables.scss').replace(/\\/g, '/')}" as *;
-  @use "${path.resolve(__dirname, 'src/styles/_mixins.scss').replace(/\\/g, '/')}" as *;
-`,
+        additionalData: `${variablesContent}\n${mixinsContent}`,
       },
     },
   },
