@@ -202,19 +202,18 @@
 }
 
 .backBtn {
-  display:       none;
+  display: none;
   @include flex-center;
-  width:         32px;
-  height:        32px;
-  border:        none;
-  background:    none;
-  font-size:     $font-size-xl;
-  cursor:        pointer;
-  color:         $color-neutral-600;
-  flex-shrink:   0;
+  width:   32px;
+  height:  32px;
+  border:  none;
+  background: none;
+  font-size:  $font-size-xl;
+  cursor:     pointer;
+  color:      $color-neutral-600;
+  flex-shrink: 0;
 
-  // Only show on mobile
-  @media (max-width: 1023px) {
+  @media (max-width: 1279px) {
     display: flex;
   }
 
