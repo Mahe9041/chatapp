@@ -149,7 +149,7 @@ const ChatPage = () => {
     // Detect mobile after mount (avoids SSR/hydration mismatch)
     useEffect(() => {
         const check = () => {
-            const mobile = window.innerWidth < 768;
+            const mobile = window.innerWidth < 1024;
             setIsMobile(mobile);
             // On mobile with no active convo — show sidebar
             // On mobile with active convo — show chat
