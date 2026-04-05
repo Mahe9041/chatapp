@@ -12,14 +12,10 @@ import { MEDIA_CONFIG, getMimeCategory } from './media.config';
 import { env } from '../../config/env';
 import type { PresignedUploadResult } from './media.types';
 
-// Initialise Supabase admin client (service role — never expose to frontend)
-const supabase = createClient(
-    env.SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
-);
-
-const BUCKET = env.SUPABASE_BUCKET; // e.g. 'chat-media'
-const SIGNED_URL_EXPIRY = 300;      // seconds — 5 minutes to complete the PUT
+// ← these two lines must be at module level, outside any function
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+const BUCKET = env.SUPABASE_BUCKET;
+const SIGNED_URL_EXPIRY = 300;
 
 /**
  * Validates the upload request and returns a signed PUT URL.

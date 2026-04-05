@@ -1,73 +1,75 @@
 // =============================================================================
-// media.repository.ts
-// Wraps AWS SDK S3 calls for Cloudflare R2.
-// R2 is S3-compatible, so we use the standard AWS SDK with a custom endpoint.
+// media.repository.ts — Supabase version
+// All direct Supabase Storage calls live here.
+// media.service.ts calls these — never touches Supabase directly.
 // =============================================================================
 
-import {
-    S3Client,
-    PutObjectCommand,
-    DeleteObjectCommand,
-    GetObjectCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { createClient } from '@supabase/supabase-js';
 import { env } from '../../config/env';
-import { PRESIGN_EXPIRES_SECONDS } from './media.config';
 
-// ── R2 client — uses S3-compatible API ───────────────────────────────────────
-const r2Client = new S3Client({
-    region: 'auto',     // R2 uses "auto" as the region
-    endpoint: `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-        accessKeyId: env.R2_ACCESS_KEY_ID,
-        secretAccessKey: env.R2_SECRET_ACCESS_KEY,
-    },
-});
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+const BUCKET = env.SUPABASE_BUCKET;
+
+export interface SignedUploadResult {
+    signedUrl: string;   // client PUTs directly to this
+    token: string;       // Supabase upload token
+}
 
 /**
- * Generates a presigned PUT URL for direct client-to-R2 upload.
- * The client uploads directly to R2 — the server never handles the binary.
- *
- * @param fileKey  - The R2 object key (path) for the file
- * @param mimeType - Content-Type header the client must send with the PUT
+ * Generates a signed URL the client can PUT a file to directly.
+ * Equivalent to R2's generatePresignedPutUrl.
  */
 export const generatePresignedPutUrl = async (
     fileKey: string,
-    mimeType: string,
+    _mimeType: string,   // kept for API compatibility — Supabase infers from PUT
 ): Promise<string> => {
-    const command = new PutObjectCommand({
-        Bucket: env.R2_BUCKET_NAME,
-        Key: fileKey,
-        ContentType: mimeType,
-    });
+    const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUploadUrl(fileKey);
 
-    return getSignedUrl(r2Client, command, {
-        expiresIn: PRESIGN_EXPIRES_SECONDS,
-    });
+    if (error || !data) {
+        throw new Error(`Failed to generate signed upload URL: ${error?.message}`);
+    }
+
+    return data.signedUrl;
 };
 
 /**
- * Generates a presigned GET URL for private files.
- * Not used for public CDN files — only for restricted access (e.g. documents).
+ * Verifies a file exists in storage after the client claims to have uploaded it.
+ * Equivalent to R2's HeadObjectCommand check.
  */
-export const generatePresignedGetUrl = async (
-    fileKey: string,
-): Promise<string> => {
-    const command = new GetObjectCommand({
-        Bucket: env.R2_BUCKET_NAME,
-        Key: fileKey,
-    });
+export const verifyFileExists = async (fileKey: string): Promise<boolean> => {
+    const folder = fileKey.split('/').slice(0, -1).join('/');
+    const filename = fileKey.split('/').pop() ?? '';
 
-    return getSignedUrl(r2Client, command, { expiresIn: 3600 }); // 1 hour
+    const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .list(folder, { search: filename });
+
+    if (error) {
+        console.warn(`verifyFileExists: error checking ${fileKey}:`, error.message);
+        return false;
+    }
+
+    return (data?.length ?? 0) > 0;
 };
 
 /**
- * Permanently deletes a file from R2.
- * Called when a message with media is hard-deleted (e.g. admin purge).
+ * Deletes a file from storage.
+ * Useful for future cleanup jobs (orphaned file removal).
  */
 export const deleteFile = async (fileKey: string): Promise<void> => {
-    await r2Client.send(new DeleteObjectCommand({
-        Bucket: env.R2_BUCKET_NAME,
-        Key: fileKey,
-    }));
+    const { error } = await supabase.storage.from(BUCKET).remove([fileKey]);
+    if (error) {
+        console.warn(`deleteFile: failed to delete ${fileKey}:`, error.message);
+    }
+};
+
+/**
+ * Builds the public URL for a file after it has been uploaded.
+ * Bucket must have public access enabled in Supabase dashboard.
+ */
+export const getPublicUrl = (fileKey: string): string => {
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(fileKey);
+    return data.publicUrl;
 };
