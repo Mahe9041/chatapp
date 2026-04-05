@@ -332,17 +332,28 @@ const ChatPage: React.FC = () => {
     handleKeyDown,
   } = useMessages(activeConvoId ?? '');
 
-  const isLoadingConvos = useChatStore((s) => s.isLoadingConvos);
+  const isLoadingConvos              = useChatStore((s) => s.isLoadingConvos);
+  const [showSidebar, setShowSidebar] = useState(!conversationId);
+  const [isMobile, setIsMobile]       = useState(window.innerWidth < 768);
+
+  // Update isMobile on resize
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   // Sync URL param → store once conversations are loaded
   useEffect(() => {
     if (conversationId && !isLoadingConvos) {
       setActiveConvo(conversationId);
+      setShowSidebar(false); // mobile: hide sidebar when convo selected
     }
   }, [conversationId, isLoadingConvos, setActiveConvo]);
 
   const handleSelectConvo = useCallback((id: string) => {
     setActiveConvo(id);
+    setShowSidebar(false); // mobile: switch to chat view
     navigate(chatRoute(id));
   }, [setActiveConvo, navigate]);
 
@@ -370,10 +381,15 @@ const ChatPage: React.FC = () => {
     : null;
   const isOtherOnline = (otherMember as any)?.user?.isOnline ?? false;
 
+  // Mobile visibility — inline styles bypass all CSS specificity issues
+
   return (
     <div className={styles.layout}>
       {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-      <aside className={styles.sidebar}>
+      <aside
+        className={styles.sidebar}
+        style={{ display: isMobile && !showSidebar ? 'none' : 'flex' }}
+      >
         <div className={styles.sidebarHeader}>
           <span className={styles.sidebarTitle}>Messages</span>
           <button className={styles.newChatBtn} onClick={() => setShowModal(true)} title="New conversation">
@@ -410,11 +426,21 @@ const ChatPage: React.FC = () => {
       </aside>
 
       {/* ── Main ─────────────────────────────────────────────────────────── */}
-      <main className={styles.main}>
+      <main
+        className={styles.main}
+        style={{ display: isMobile && showSidebar ? 'none' : 'flex' }}
+      >
         {activeConvo ? (
-          <>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
             {/* Header */}
             <div className={styles.chatHeader}>
+              {/* Mobile back button */}
+              <button
+                className={styles.backBtn}
+                onClick={() => setShowSidebar(true)}
+              >
+                ←
+              </button>
               <Avatar
                 name={getConvoName(activeConvo)}
                 isOnline={activeConvo.type === 'DIRECT' ? isOtherOnline : undefined}
@@ -466,7 +492,7 @@ const ChatPage: React.FC = () => {
                 Send
               </button>
             </div>
-          </>
+          </div>
         ) : (
           <div className={styles.emptyMain}>
             <div className={styles.emptyIcon}>💬</div>

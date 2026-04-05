@@ -59,14 +59,14 @@ export function createApp() {
     app.use('/api/users', userRoutes);
 
     // Nested message route: GET /api/conversations/:conversationId/messages
-    app.use(
-        '/api/conversations/:conversationId/messages',
-        (req, _res, next) => {
-            req.params.conversationId = req.params.conversationId;
-            next();
-        },
-        messageRoutes,
-    );
+    // app.use(
+    //     '/api/conversations/:conversationId/messages',
+    //     (req, _res, next) => {
+    //         req.params.conversationId = req.params.conversationId;
+    //         next();
+    //     },
+    //     messageRoutes,
+    // );
 
     // ── Global error handler — must always be last ─────────────────────────────
     app.use(errorMiddleware);

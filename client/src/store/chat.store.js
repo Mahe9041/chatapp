@@ -1,10 +1,12 @@
 // =============================================================================
 // store/chat.store.ts
+// Zustand store for all chat state.
+// Owns: conversations list, messages per conversation, typing state, presence.
 // =============================================================================
 import { create } from 'zustand';
 import * as ConvoApi from '../api/conversations.api';
 import * as MessageApi from '../api/messages.api';
-import { emitSendMessage, emitReadMark, } from '../socket/socket.events';
+import { emitSendMessage, emitReadMark } from '../socket/socket.events';
 export const useChatStore = create((set, get) => ({
     conversations: [],
     messages: {},
@@ -12,6 +14,7 @@ export const useChatStore = create((set, get) => ({
     activeConvoId: null,
     isLoadingConvos: false,
     isLoadingMsgs: false,
+    // ── Load all conversations ─────────────────────────────────────────────────
     loadConversations: async () => {
         set({ isLoadingConvos: true });
         try {
@@ -22,12 +25,14 @@ export const useChatStore = create((set, get) => ({
             set({ isLoadingConvos: false });
         }
     },
+    // ── Set active conversation + load its messages ───────────────────────────
     setActiveConvo: (conversationId) => {
         set({ activeConvoId: conversationId });
-        if (!get().messages[conversationId]) {
+        const alreadyLoaded = get().messages[conversationId];
+        if (!alreadyLoaded)
             get().loadMessages(conversationId);
-        }
     },
+    // ── Load messages (paginated) ─────────────────────────────────────────────
     loadMessages: async (conversationId, before) => {
         set({ isLoadingMsgs: true });
         try {
@@ -37,6 +42,7 @@ export const useChatStore = create((set, get) => ({
                 messages: {
                     ...state.messages,
                     [conversationId]: before
+                        // Prepend older messages for infinite scroll
                         ? [...msgs, ...(state.messages[conversationId] ?? [])]
                         : msgs,
                 },
@@ -46,23 +52,32 @@ export const useChatStore = create((set, get) => ({
             set({ isLoadingMsgs: false });
         }
     },
+    // ── Create conversations ──────────────────────────────────────────────────
     createDirect: async (targetUserId) => {
         const convo = await ConvoApi.createDirect(targetUserId);
-        set((state) => ({ conversations: [convo, ...state.conversations] }));
+        set((state) => ({
+            conversations: [convo, ...state.conversations],
+        }));
         return convo;
     },
     createGroup: async (name, memberIds) => {
         const convo = await ConvoApi.createGroup(name, memberIds);
-        set((state) => ({ conversations: [convo, ...state.conversations] }));
+        set((state) => ({
+            conversations: [convo, ...state.conversations],
+        }));
         return convo;
     },
+    // ── Send a text message via WebSocket ─────────────────────────────────────
     sendMessage: async (conversationId, text) => {
         await emitSendMessage({
             conversationId,
             type: 'text',
             content: { text },
         });
+        // The actual message is added to state via receiveMessage()
+        // when the server broadcasts message:new back (including to sender)
     },
+    // ── Incoming: new message ─────────────────────────────────────────────────
     receiveMessage: (message) => {
         set((state) => ({
             messages: {
@@ -72,16 +87,19 @@ export const useChatStore = create((set, get) => ({
                     message,
                 ],
             },
+            // Bump conversation to top of list
             conversations: state.conversations
                 .map((c) => c.id === message.conversationId
                 ? { ...c, lastMessage: message, updatedAt: new Date().toISOString() }
                 : c)
                 .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
         }));
+        // Auto-mark as read if this conversation is currently active
         if (get().activeConvoId === message.conversationId) {
             emitReadMark(message.conversationId, message.seq);
         }
     },
+    // ── Incoming: message edited ──────────────────────────────────────────────
     handleMessageEdited: (payload) => {
         set((state) => ({
             messages: {
@@ -92,6 +110,7 @@ export const useChatStore = create((set, get) => ({
             },
         }));
     },
+    // ── Incoming: message deleted ─────────────────────────────────────────────
     handleMessageDeleted: (payload) => {
         set((state) => ({
             messages: {
@@ -102,28 +121,29 @@ export const useChatStore = create((set, get) => ({
             },
         }));
     },
+    // ── Incoming: reaction ────────────────────────────────────────────────────
     handleMessageReaction: (payload) => {
+        // Reload that conversation's messages to get fresh reactions
+        // (simpler than trying to merge reaction state manually)
         get().loadMessages(payload.conversationId);
     },
+    // ── Incoming: typing start ────────────────────────────────────────────────
     handleTypingStart: (payload) => {
         set((state) => {
-            const cur = new Set(state.typingUsers[payload.conversationId] ?? []);
-            cur.add(payload.userId);
-            return { typingUsers: { ...state.typingUsers, [payload.conversationId]: cur } };
+            const current = new Set(state.typingUsers[payload.conversationId] ?? []);
+            current.add(payload.userId);
+            return { typingUsers: { ...state.typingUsers, [payload.conversationId]: current } };
         });
     },
+    // ── Incoming: typing stop ─────────────────────────────────────────────────
     handleTypingStop: (payload) => {
         set((state) => {
-            const cur = new Set(state.typingUsers[payload.conversationId] ?? []);
-            cur.delete(payload.userId);
-            return { typingUsers: { ...state.typingUsers, [payload.conversationId]: cur } };
+            const current = new Set(state.typingUsers[payload.conversationId] ?? []);
+            current.delete(payload.userId);
+            return { typingUsers: { ...state.typingUsers, [payload.conversationId]: current } };
         });
     },
-    /**
-     * Updates the isOnline + lastSeen fields on a specific member's user object.
-     * We must reconstruct the user shape correctly — spreading the member itself
-     * would give wrong fields (member has userId/role, not id/email/displayName).
-     */
+    // ── Incoming: presence update ─────────────────────────────────────────────
     handlePresenceUpdate: (payload) => {
         set((state) => ({
             conversations: state.conversations.map((c) => ({
@@ -131,16 +151,21 @@ export const useChatStore = create((set, get) => ({
                 members: c.members.map((m) => {
                     if (m.userId !== payload.userId)
                         return m;
+                    if (!m.user)
+                        return m;
                     return {
                         ...m,
-                        user: m.user
-                            ? { ...m.user, isOnline: payload.isOnline, lastSeen: payload.lastSeen }
-                            : undefined,
+                        user: {
+                            ...m.user,
+                            isOnline: payload.isOnline,
+                            lastSeen: payload.lastSeen,
+                        },
                     };
                 }),
             })),
         }));
     },
+    // ── Incoming: read receipt ────────────────────────────────────────────────
     handleReadReceipt: (payload) => {
         set((state) => ({
             messages: {

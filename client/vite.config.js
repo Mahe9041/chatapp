@@ -6,6 +6,10 @@ const variablesContent = fs.readFileSync(path.resolve(__dirname, 'src/styles/_va
 const mixinsContent = fs.readFileSync(path.resolve(__dirname, 'src/styles/_mixins.scss'), 'utf-8');
 export default defineConfig({
     plugins: [react()],
+    server: {
+        host: '0.0.0.0', // expose to network
+        port: 5173,
+    },
     resolve: {
         alias: {
             '@chatapp/shared': path.resolve(__dirname, '../shared/types/index.ts'),

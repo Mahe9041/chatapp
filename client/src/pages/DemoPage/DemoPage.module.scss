@@ -1,6 +1,5 @@
 // Variables and mixins are auto-injected via vite.config.ts additionalData
 // Do NOT add @use imports here — they cause double-import errors
-@use 'sass:color';
 
 // ── Page layout ───────────────────────────────────────────────────────────────
 
@@ -71,7 +70,7 @@
   cursor:        pointer;
   transition:    background $transition-fast;
 
-  &:hover { background: color.adjust($color-brand-primary-light, $lightness: -5%); }
+  &:hover { background: #d5d0ff; }
 }
 
 .panelMessages {

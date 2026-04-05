@@ -4,11 +4,40 @@
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 .layout {
-  display:               grid;
-  grid-template-columns: 300px 1fr;
-  height:                100vh;
-  overflow:              hidden;
-  background:            $color-neutral-100;
+  display:      flex;
+  height:       100vh;
+  overflow:     hidden;
+  background:   $color-neutral-100;
+  align-items:  stretch;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+.sidebar {
+  flex-direction: column;
+  background:     #fff;
+  border-right:   1px solid $color-neutral-200;
+  overflow:       hidden;
+  flex-shrink:    0;
+  width:          100%;            // mobile: full width
+
+  @include respond-to('md') {
+    width: 300px;                  // desktop: fixed width
+  }
+}
+
+// ── Main panel ────────────────────────────────────────────────────────────────
+
+.main {
+  display:        flex;
+  flex-direction: column;
+  overflow:       hidden;
+  background:     #fff;
+  flex:           1;
+  min-width:      0;
+  min-height:     0;
+  height:         100%;
+  width:          100%;
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
@@ -166,14 +195,7 @@
   @include truncate;
 }
 
-// ── Main panel ────────────────────────────────────────────────────────────────
-
-.main {
-  display:        flex;
-  flex-direction: column;
-  overflow:       hidden;
-  background:     #fff;
-}
+// ── Chat header ───────────────────────────────────────────────────────────────
 
 .chatHeader {
   @include flex-row($spacing-3);
@@ -181,6 +203,26 @@
   border-bottom: 1px solid $color-neutral-200;
   flex-shrink:   0;
   background:    #fff;
+}
+
+.backBtn {
+  display:       none;
+  @include flex-center;
+  width:         32px;
+  height:        32px;
+  border:        none;
+  background:    none;
+  font-size:     $font-size-xl;
+  cursor:        pointer;
+  color:         $color-neutral-600;
+  flex-shrink:   0;
+
+  // Only show on mobile
+  @media (max-width: 767px) {
+    display: flex;
+  }
+
+  &:hover { color: $color-neutral-900; }
 }
 
 .chatName {
@@ -198,7 +240,8 @@
 // ── Messages ──────────────────────────────────────────────────────────────────
 
 .messageList {
-  flex:           1;
+  flex:           1;        // take all available space
+  min-height:     0;        // critical — allows overflow-y to work in flex
   overflow-y:     auto;
   padding:        $spacing-4 $spacing-5;
   display:        flex;
@@ -212,10 +255,14 @@
 .otherWrap    { justify-content: flex-start; }
 
 .bubble {
-  max-width:     68%;
+  max-width:     85%;  // wider on mobile
   padding:       $spacing-2 $spacing-3;
   border-radius: $radius-lg;
   word-break:    break-word;
+
+  @include respond-to('md') {
+    max-width: 68%; // desktop: narrower
+  }
 }
 
 .ownBubble {
@@ -293,10 +340,10 @@
 
 .inputArea {
   @include flex-row($spacing-2);
-  padding:    $spacing-3 $spacing-4;
-  border-top: 1px solid $color-neutral-200;
-  background: #fff;
-  flex-shrink:0;
+  padding:     $spacing-3 $spacing-4;
+  border-top:  1px solid $color-neutral-200;
+  background:  #fff;
+  flex-shrink: 0;  // never shrink — always stays at bottom
 }
 
 .input {

@@ -1,68 +1,77 @@
-// =============================================================================
-// App.tsx
-// Root component: routing, auth rehydration, socket lifecycle.
-// =============================================================================
-
-import { useEffect }              from 'react';
-import { BrowserRouter, Routes,
-         Route, Navigate }        from 'react-router-dom';
-import { useAuthStore }           from './store/auth.store';
-import { connectSocket,
-         disconnectSocket }       from './socket/socket.client';
-import { registerSocketHandlers } from './socket/socket.handlers';
-import { useChatStore }           from './store/chat.store';
-import { ROUTES }                 from './constants/routes';
-
-// Pages — lazy load to keep initial bundle small
-import LoginPage    from './pages/LoginPage/LoginPage';
-import ChatPage     from './pages/ChatPage/ChatPage';
-
 /**
- * Wrapper that redirects unauthenticated users to /login.
+ * App.tsx — Root component
+ * -------------------------
+ * Handles routing, auth rehydration, and socket lifecycle.
  */
+
+import { useEffect, useState }        from 'react';
+import { BrowserRouter, Routes,
+         Route, Navigate }            from 'react-router-dom';
+import { useAuthStore }               from './store/auth.store';
+import { connectSocket,
+         disconnectSocket }           from './socket/socket.client';
+import { registerSocketHandlers }     from './socket/socket.handlers';
+import { useChatStore }               from './store/chat.store';
+import { ROUTES }                     from './constants/routes';
+
+// Pages
+import LoginPage  from './pages/LoginPage/LoginPage';
+import ChatPage   from './pages/ChatPage/ChatPage';
+import DemoPage   from './pages/DemoPage/DemoPage';
+
+/** Redirects unauthenticated users to /login */
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
   return user ? <>{children}</> : <Navigate to={ROUTES.LOGIN} replace />;
 }
 
-/**
- * Root application component.
- * Handles:
- *  1. Session rehydration on app load
- *  2. Socket connection lifecycle (connect on login, disconnect on logout)
- *  3. Route definitions
- */
 export default function App() {
   const { user, accessToken, rehydrate } = useAuthStore();
-  const loadConversations = useChatStore((s) => s.loadConversations);
+  const loadConversations                = useChatStore((s) => s.loadConversations);
+  const setActiveConvo                   = useChatStore((s) => s.setActiveConvo);
+  const [rehydrated, setRehydrated]      = useState(false);
 
-  // ── Rehydrate session on app load ─────────────────────────────────────────
+  // ── Step 1: Rehydrate session on first load ───────────────────────────────
   useEffect(() => {
-    rehydrate();
+    rehydrate().finally(() => setRehydrated(true));
   }, [rehydrate]);
 
-  // ── Socket lifecycle — connect when authenticated ─────────────────────────
+  // ── Step 2: Connect socket + load conversations when authenticated ────────
   useEffect(() => {
-    if (user && accessToken) {
-      const socket = connectSocket(accessToken);
+    if (!user || !accessToken) return;
 
-      // Wait for connection before registering handlers
-      socket.on('connect', () => {
-        registerSocketHandlers();
-        loadConversations();
-      });
+    const socket = connectSocket(accessToken);
 
-      return () => {
-        disconnectSocket();
-      };
-    }
-  }, [user, accessToken, loadConversations]);
+    socket.on('connect', async () => {
+      registerSocketHandlers();
+
+      // Load conversations first, THEN sync the URL conversationId
+      await loadConversations();
+
+      // If URL has a conversationId (e.g. user refreshed on /chat/:id),
+      // set it as active now that conversations are loaded
+      const match = window.location.pathname.match(/\/chat\/([^/]+)/);
+      if (match?.[1]) {
+        setActiveConvo(match[1]);
+      }
+    });
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [user, accessToken, loadConversations, setActiveConvo]);
+
+  // Don't render routes until rehydration is complete — prevents flash redirect
+  if (!rehydrated) return null;
 
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route path={ROUTES.DEMO}  element={<DemoPage />} />
 
+        {/* Protected */}
         <Route
           path="/chat/*"
           element={
@@ -72,7 +81,7 @@ export default function App() {
           }
         />
 
-        {/* Default redirect */}
+        {/* Redirects */}
         <Route path="/" element={<Navigate to={ROUTES.CHAT} replace />} />
         <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
       </Routes>

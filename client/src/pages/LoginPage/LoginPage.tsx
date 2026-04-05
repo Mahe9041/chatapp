@@ -7,9 +7,10 @@
 
 import React, { useState, useEffect }  from 'react';
 import { useNavigate, Link }           from 'react-router-dom';
-import { useAuthStore, useAuthIsLoading, useAuthError } from '../../store/auth.store';
+import { useAuthStore, useIsAuthenticated,
+         useAuthIsLoading, useAuthError }    from '../../store/auth.store';
 import { ROUTES }                      from '../../constants/routes';
-import styles from './LoginPage.module.scss';
+import styles                          from './LoginPage.module.scss';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,10 +33,8 @@ const INITIAL_FORM: FormState = { email: '', password: '', displayName: '' };
 const LoginPage: React.FC = () => {
   const navigate             = useNavigate();
   const { login, register }  = useAuthStore();
-  // const isLoading            = useAuthIsLoading();
-  // const error                = useAuthError();
-  const isLoading = useAuthIsLoading();
-  const error     = useAuthError();
+  const isLoading            = useAuthIsLoading();
+  const error                = useAuthError();
 
   const [mode, setMode]       = useState<Mode>('login');
   const [form, setForm]       = useState<FormState>(INITIAL_FORM);
@@ -226,8 +225,13 @@ const LoginPage: React.FC = () => {
           <div className={styles.demoLink}>
             Want to explore without an account?{' '}
             <Link to={ROUTES.DEMO} className={styles.link}>
-              Try demo mode
+              Try demo mode →
             </Link>
+          </div>
+
+          {/* Demo hint */}
+          <div className={styles.demoHint}>
+            Demo mode shows a live split-screen with real-time system diagrams
           </div>
         </form>
       </div>

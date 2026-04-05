@@ -26,11 +26,11 @@ export function useMessages(conversationId: string) {
 
     const convoMessages = messages[conversationId] ?? [];
 
-    // Load messages on mount or when conversationId changes
+    // Load messages whenever conversationId changes OR when we have an id but no messages
     useEffect(() => {
-        if (conversationId && !messages[conversationId]) {
-            loadMessages(conversationId);
-        }
+        if (!conversationId) return;
+        // Always reload on conversationId change — handles refresh case
+        loadMessages(conversationId);
     }, [conversationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Auto-scroll to bottom when new messages arrive

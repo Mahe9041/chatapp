@@ -1,8 +1,7 @@
-// =============================================================================
-// socket/handlers/message.handler.ts — updated with demo tracer
-// Replace the Phase 2 version with this one.
-// The only addition is createMessageTracer() calls at each processing stage.
-// =============================================================================
+/**
+ * message.handler.ts — WebSocket message event handlers
+ * Updated to properly emit read receipts after broadcast
+ */
 
 import type { Server, Socket } from 'socket.io';
 import * as MessageService from '../../modules/messages/messages.service';
@@ -14,25 +13,18 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
     const { userId } = socket.data;
 
     socket.on('message:send', async (payload, ack) => {
-        // Create a tracer for this message — records timing at each stage
         const tracer = createMessageTracer(payload.clientMsgId, payload.conversationId);
 
         try {
-            // ── Stage: WebSocket received ──────────────────────────────────────
             tracer.recordStage('ws_received', { senderId: userId });
-
-            // ── Stage: Permission check ────────────────────────────────────────
-            // (done inside sendMessage — we record before + after)
             tracer.recordStage('permission_check');
 
-            // ── Stage: DB write ────────────────────────────────────────────────
             const message = await MessageService.sendMessage(userId, payload);
             tracer.recordStage('db_write', {
                 seqNumber: message.seq,
                 messageId: message._id.toString(),
             });
 
-            // ── Stage: Queue check (offline members) ───────────────────────────
             const members = await prisma.conversationMember.findMany({
                 where: { conversationId: payload.conversationId },
                 include: { user: { select: { isOnline: true } } },
@@ -43,28 +35,29 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
                 offlineMembers: offlineCount,
             });
 
-            // ── Stage: WebSocket broadcast ────────────────────────────────────
-            io.to(`conversation:${payload.conversationId}`).emit('message:new', {
+            // Broadcast message to all conversation members
+            const messageObj = {
                 ...message.toObject(),
                 id: message._id.toString(),
-            });
-            tracer.recordStage('ws_broadcast', {
-                roomSize: (await io.in(`conversation:${payload.conversationId}`)
-                    .fetchSockets()).length,
-            });
+            };
+            io.to(`conversation:${payload.conversationId}`).emit('message:new', messageObj);
+            tracer.recordStage('ws_broadcast');
 
-            // ── Stage: Queue enqueue (if offline members exist) ───────────────
             if (offlineCount > 0) {
                 tracer.recordStage('queue_enqueue', { offlineCount });
             }
 
-            // ── Ack to sender ─────────────────────────────────────────────────
+            // Send ack to sender with seq + server ID
             ack({ status: 'ok', seq: message.seq, serverId: message._id.toString() });
 
-            // ── Stage: Complete (receiver side) ──────────────────────────────
-            // We complete the trace immediately — in reality "receiver_received"
-            // fires when the client emits read:mark, but for demo latency display
-            // we approximate it as the broadcast completing.
+            // Emit read receipt for sender (they've implicitly read their own message)
+            io.to(`conversation:${payload.conversationId}`).emit('read:receipt', {
+                conversationId: payload.conversationId,
+                userId,
+                upToSeq: message.seq,
+                status: 'read' as const,
+            });
+
             tracer.complete({ approximated: true });
 
         } catch (err) {
@@ -73,7 +66,6 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
         }
     });
 
-    /** message:edit */
     socket.on('message:edit', async (payload) => {
         try {
             await MessageService.editMessage(payload.messageId, userId, payload.text);
@@ -83,7 +75,6 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
         }
     });
 
-    /** message:delete */
     socket.on('message:delete', async (payload) => {
         try {
             await MessageService.deleteMessage(payload.messageId, userId);
@@ -93,7 +84,6 @@ export function registerMessageHandlers(io: Server, socket: Socket) {
         }
     });
 
-    /** message:react */
     socket.on('message:react', async (payload) => {
         try {
             await MessageService.reactToMessage(payload.messageId, userId, payload.emoji);

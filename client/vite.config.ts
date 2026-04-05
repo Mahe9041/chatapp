@@ -12,6 +12,10 @@ const mixinsContent = fs.readFileSync(
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: '0.0.0.0',  // expose to network
+    port: 5173,
+  },
   resolve: {
     alias: {
       '@chatapp/shared': path.resolve(__dirname, '../shared/types/index.ts'),
