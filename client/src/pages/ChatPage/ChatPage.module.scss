@@ -4,11 +4,10 @@
 // ── Layout ────────────────────────────────────────────────────────────────────
 
 .layout {
-  display:      flex;
-  height:       100vh;
-  overflow:     hidden;
-  background:   $color-neutral-100;
-  align-items:  stretch;
+  display:    flex;
+  height:     100vh;
+  overflow:   hidden;
+  background: $color-neutral-100;
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -29,15 +28,12 @@
 // ── Main panel ────────────────────────────────────────────────────────────────
 
 .main {
-  display:        flex;
   flex-direction: column;
   overflow:       hidden;
   background:     #fff;
   flex:           1;
   min-width:      0;
-  min-height:     0;
-  height:         100%;
-  width:          100%;
+  width:          100%;            // mobile: full width
 }
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
@@ -255,14 +251,13 @@
 .otherWrap    { justify-content: flex-start; }
 
 .bubble {
-  max-width:     85%;  // wider on mobile
+  max-width:     75%;
+  min-width:     60px;
   padding:       $spacing-2 $spacing-3;
   border-radius: $radius-lg;
   word-break:    break-word;
-
-  @include respond-to('md') {
-    max-width: 68%; // desktop: narrower
-  }
+  word-wrap:     break-word;
+  overflow-wrap: break-word;
 }
 
 .ownBubble {

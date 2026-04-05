@@ -333,15 +333,23 @@ const ChatPage: React.FC = () => {
   } = useMessages(activeConvoId ?? '');
 
   const isLoadingConvos              = useChatStore((s) => s.isLoadingConvos);
-  const [showSidebar, setShowSidebar] = useState(!conversationId);
-  const [isMobile, setIsMobile]       = useState(window.innerWidth < 768);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [isMobile, setIsMobile]       = useState(false);
 
-  // Update isMobile on resize
+  // Detect mobile after mount (avoids SSR/hydration mismatch)
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // On mobile with no active convo — show sidebar
+      // On mobile with active convo — show chat
+      if (mobile && conversationId) setShowSidebar(false);
+      if (!mobile) setShowSidebar(true); // desktop: always show sidebar
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [conversationId]);
 
   // Sync URL param → store once conversations are loaded
   useEffect(() => {
@@ -380,8 +388,7 @@ const ChatPage: React.FC = () => {
     ? activeConvo.members?.find((m: any) => m.userId !== user?.id)
     : null;
   const isOtherOnline = (otherMember as any)?.user?.isOnline ?? false;
-
-  // Mobile visibility — inline styles bypass all CSS specificity issues
+  // const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <div className={styles.layout}>

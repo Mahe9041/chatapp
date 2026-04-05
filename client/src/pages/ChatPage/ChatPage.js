@@ -144,14 +144,24 @@ const ChatPage = () => {
     const { conversations, activeConvoId, setActiveConvo, typingUsers, } = useChatStore();
     const { messages, isLoading: isLoadingMsgs, inputText, bottomRef, handleInputChange, handleSend, handleKeyDown, } = useMessages(activeConvoId ?? '');
     const isLoadingConvos = useChatStore((s) => s.isLoadingConvos);
-    const [showSidebar, setShowSidebar] = useState(!conversationId);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    // Update isMobile on resize
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+    // Detect mobile after mount (avoids SSR/hydration mismatch)
     useEffect(() => {
-        const handler = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handler);
-        return () => window.removeEventListener('resize', handler);
-    }, []);
+        const check = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            // On mobile with no active convo — show sidebar
+            // On mobile with active convo — show chat
+            if (mobile && conversationId)
+                setShowSidebar(false);
+            if (!mobile)
+                setShowSidebar(true); // desktop: always show sidebar
+        };
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, [conversationId]);
     // Sync URL param → store once conversations are loaded
     useEffect(() => {
         if (conversationId && !isLoadingConvos) {
@@ -186,7 +196,7 @@ const ChatPage = () => {
         ? activeConvo.members?.find((m) => m.userId !== user?.id)
         : null;
     const isOtherOnline = otherMember?.user?.isOnline ?? false;
-    // Mobile visibility — inline styles bypass all CSS specificity issues
+    // const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     return (_jsxs("div", { className: styles.layout, children: [_jsxs("aside", { className: styles.sidebar, style: { display: isMobile && !showSidebar ? 'none' : 'flex' }, children: [_jsxs("div", { className: styles.sidebarHeader, children: [_jsx("span", { className: styles.sidebarTitle, children: "Messages" }), _jsx("button", { className: styles.newChatBtn, onClick: () => setShowModal(true), title: "New conversation", children: "\u270F\uFE0F" })] }), _jsxs("div", { className: styles.currentUser, children: [_jsx(Avatar, { name: user?.displayName ?? '?', size: "sm" }), _jsx("span", { className: styles.userName, children: user?.displayName }), _jsx("button", { className: styles.logoutBtn, onClick: handleLogout, children: "Sign out" })] }), _jsxs("div", { className: styles.convoList, children: [isLoadingConvos && _jsx("div", { className: styles.hint, children: "Loading..." }), !isLoadingConvos && conversations.length === 0 && (_jsxs("div", { className: styles.emptyConvos, children: [_jsx("p", { children: "No conversations yet" }), _jsx("button", { className: styles.startBtn, onClick: () => setShowModal(true), children: "Start a conversation" })] })), conversations.map((convo) => (_jsx(ConvoItem, { convo: convo, isActive: convo.id === activeConvoId, currentUserId: user?.id ?? '', onClick: () => handleSelectConvo(convo.id) }, convo.id)))] })] }), _jsx("main", { className: styles.main, style: { display: isMobile && showSidebar ? 'none' : 'flex' }, children: activeConvo ? (_jsxs("div", { style: { display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }, children: [_jsxs("div", { className: styles.chatHeader, children: [_jsx("button", { className: styles.backBtn, onClick: () => setShowSidebar(true), children: "\u2190" }), _jsx(Avatar, { name: getConvoName(activeConvo), isOnline: activeConvo.type === 'DIRECT' ? isOtherOnline : undefined }), _jsxs("div", { children: [_jsx("div", { className: styles.chatName, children: getConvoName(activeConvo) }), activeConvo.type === 'DIRECT' && (_jsx("div", { className: styles.chatStatus, children: isOtherOnline ? 'Online' : 'Offline' })), activeConvo.type === 'GROUP' && (_jsxs("div", { className: styles.chatStatus, children: [activeConvo.members?.length, " members"] }))] })] }), _jsxs("div", { className: styles.messageList, children: [isLoadingMsgs && _jsx("div", { className: styles.hint, children: "Loading messages..." }), messages.map((msg) => (_jsx(MessageBubble, { message: msg, isOwn: msg.senderId === user?.id }, msg.id))), _jsx(TypingIndicator, { names: typingNames }), _jsx("div", { ref: bottomRef })] }), _jsxs("div", { className: styles.inputArea, children: [_jsx("textarea", { className: styles.input, placeholder: "Type a message... (Enter to send, Shift+Enter for newline)", value: inputText, onChange: (e) => handleInputChange(e.target.value), onKeyDown: handleKeyDown, rows: 1 }), _jsx("button", { className: styles.sendBtn, onClick: handleSend, disabled: !inputText.trim(), children: "Send" })] })] })) : (_jsxs("div", { className: styles.emptyMain, children: [_jsx("div", { className: styles.emptyIcon, children: "\uD83D\uDCAC" }), _jsx("div", { className: styles.emptyText, children: "Select a conversation or start a new one" }), _jsx("button", { className: styles.startBtn, onClick: () => setShowModal(true), children: "New conversation" })] })) }), showModal && _jsx(NewConversationModal, { onClose: () => setShowModal(false) })] }));
 };
 export default ChatPage;
