@@ -5,24 +5,28 @@
 // Redirects to /chat on success.
 // =============================================================================
 
-import React, { useState, useEffect }  from 'react';
-import { useNavigate, Link }           from 'react-router-dom';
-import { useAuthStore, useIsAuthenticated,
-         useAuthIsLoading, useAuthError }    from '../../store/auth.store';
-import { ROUTES }                      from '../../constants/routes';
-import styles                          from './LoginPage.module.scss';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  useAuthStore,
+  useIsAuthenticated,
+  useAuthIsLoading,
+  useAuthError,
+} from "../../store/auth.store";
+import { ROUTES } from "../../constants/routes";
+import styles from "./LoginPage.module.scss";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type Mode = 'login' | 'register';
+type Mode = "login" | "register";
 
 interface FormState {
-  email:       string;
-  password:    string;
+  email: string;
+  password: string;
   displayName: string; // only used in register mode
 }
 
-const INITIAL_FORM: FormState = { email: '', password: '', displayName: '' };
+const INITIAL_FORM: FormState = { email: "", password: "", displayName: "" };
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -31,13 +35,13 @@ const INITIAL_FORM: FormState = { email: '', password: '', displayName: '' };
  * Redirects authenticated users to /chat automatically.
  */
 const LoginPage: React.FC = () => {
-  const navigate             = useNavigate();
-  const { login, register }  = useAuthStore();
-  const isLoading            = useAuthIsLoading();
-  const error                = useAuthError();
+  const navigate = useNavigate();
+  const { login, register } = useAuthStore();
+  const isLoading = useAuthIsLoading();
+  const error = useAuthError();
 
-  const [mode, setMode]       = useState<Mode>('login');
-  const [form, setForm]       = useState<FormState>(INITIAL_FORM);
+  const [mode, setMode] = useState<Mode>("login");
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<FormState>>({});
 
   // If already authenticated, skip the page
@@ -69,13 +73,13 @@ const LoginPage: React.FC = () => {
     const errors: Partial<FormState> = {};
 
     if (!form.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = "Please enter a valid email address";
     }
     if (form.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
+      errors.password = "Password must be at least 8 characters";
     }
-    if (mode === 'register' && form.displayName.trim().length < 2) {
-      errors.displayName = 'Display name must be at least 2 characters';
+    if (mode === "register" && form.displayName.trim().length < 2) {
+      errors.displayName = "Display name must be at least 2 characters";
     }
 
     setFieldErrors(errors);
@@ -88,10 +92,14 @@ const LoginPage: React.FC = () => {
     if (!validate()) return;
 
     try {
-      if (mode === 'login') {
+      if (mode === "login") {
         await login({ email: form.email, password: form.password });
       } else {
-        await register({ email: form.email, password: form.password, displayName: form.displayName });
+        await register({
+          email: form.email,
+          password: form.password,
+          displayName: form.displayName,
+        });
       }
       navigate(ROUTES.CHAT, { replace: true });
     } catch {
@@ -114,17 +122,17 @@ const LoginPage: React.FC = () => {
         <div className={styles.tabs} role="tablist">
           <button
             role="tab"
-            aria-selected={mode === 'login'}
-            className={`${styles.tab} ${mode === 'login' ? styles.tabActive : ''}`}
-            onClick={() => handleModeSwitch('login')}
+            aria-selected={mode === "login"}
+            className={`${styles.tab} ${mode === "login" ? styles.tabActive : ""}`}
+            onClick={() => handleModeSwitch("login")}
           >
             Sign in
           </button>
           <button
             role="tab"
-            aria-selected={mode === 'register'}
-            className={`${styles.tab} ${mode === 'register' ? styles.tabActive : ''}`}
-            onClick={() => handleModeSwitch('register')}
+            aria-selected={mode === "register"}
+            className={`${styles.tab} ${mode === "register" ? styles.tabActive : ""}`}
+            onClick={() => handleModeSwitch("register")}
           >
             Create account
           </button>
@@ -133,7 +141,7 @@ const LoginPage: React.FC = () => {
         {/* Form */}
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           {/* Display name — register only */}
-          {mode === 'register' && (
+          {mode === "register" && (
             <div className={styles.field}>
               <label htmlFor="displayName" className={styles.label}>
                 Display name
@@ -145,7 +153,7 @@ const LoginPage: React.FC = () => {
                 autoComplete="name"
                 value={form.displayName}
                 onChange={handleChange}
-                className={`${styles.input} ${fieldErrors.displayName ? styles.inputError : ''}`}
+                className={`${styles.input} ${fieldErrors.displayName ? styles.inputError : ""}`}
                 placeholder="How should others see you?"
                 disabled={isLoading}
               />
@@ -169,7 +177,7 @@ const LoginPage: React.FC = () => {
               autoComplete="email"
               value={form.email}
               onChange={handleChange}
-              className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`}
+              className={`${styles.input} ${fieldErrors.email ? styles.inputError : ""}`}
               placeholder="you@example.com"
               disabled={isLoading}
             />
@@ -189,11 +197,13 @@ const LoginPage: React.FC = () => {
               id="password"
               name="password"
               type="password"
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoComplete={
+                mode === "login" ? "current-password" : "new-password"
+              }
               value={form.password}
               onChange={handleChange}
-              className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`}
-              placeholder={mode === 'login' ? '••••••••' : 'Min. 8 characters'}
+              className={`${styles.input} ${fieldErrors.password ? styles.inputError : ""}`}
+              placeholder={mode === "login" ? "••••••••" : "Min. 8 characters"}
               disabled={isLoading}
             />
             {fieldErrors.password && (
@@ -217,13 +227,15 @@ const LoginPage: React.FC = () => {
             disabled={isLoading}
           >
             {isLoading
-              ? 'Please wait...'
-              : mode === 'login' ? 'Sign in' : 'Create account'}
+              ? "Please wait..."
+              : mode === "login"
+                ? "Sign in"
+                : "Create account"}
           </button>
 
           {/* Demo mode link */}
           <div className={styles.demoLink}>
-            Want to explore without an account?{' '}
+            Want to explore without an account?(please use Desktop for this){" "}
             <Link to={ROUTES.DEMO} className={styles.link}>
               Try demo mode →
             </Link>

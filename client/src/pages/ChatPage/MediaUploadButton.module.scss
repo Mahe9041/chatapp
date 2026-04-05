@@ -1,0 +1,45 @@
+.wrap {
+  position:   relative;
+  flex-shrink: 0;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.btn {
+  @include flex-center;
+  width:         36px;
+  height:        36px;
+  border:        none;
+  background:    $color-neutral-100;
+  border-radius: $radius-full;
+  cursor:        pointer;
+  transition:    background $transition-fast;
+  flex-shrink:   0;
+
+  &:hover:not(:disabled) { background: $color-neutral-200; }
+  &:disabled             { opacity: 0.5; cursor: not-allowed; }
+}
+
+.icon    { font-size: 16px; }
+
+.progress {
+  font-size:   $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color:       $color-brand-primary;
+}
+
+.error {
+  position:      absolute;
+  bottom:        calc(100% + 6px);
+  left:          50%;
+  transform:     translateX(-50%);
+  background:    $color-error;
+  color:         #fff;
+  font-size:     $font-size-xs;
+  padding:       $spacing-1 $spacing-2;
+  border-radius: $radius-md;
+  white-space:   nowrap;
+  z-index:       $z-tooltip;
+}

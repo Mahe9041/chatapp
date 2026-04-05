@@ -35,10 +35,10 @@ const envSchema = z.object({
     REDIS_URL: z.string().url('REDIS_URL must be a valid URL'),
 
     // ── Object Storage (Cloudflare R2) ─────────────────────────────────────────
-    R2_ACCOUNT_ID: z.string().min(1),
-    R2_ACCESS_KEY_ID: z.string().min(1),
-    R2_SECRET_ACCESS_KEY: z.string().min(1),
-    R2_BUCKET_NAME: z.string().min(1),
+    // R2_ACCOUNT_ID: z.string().min(1),
+    // R2_ACCESS_KEY_ID: z.string().min(1),
+    // R2_SECRET_ACCESS_KEY: z.string().min(1),
+    // R2_BUCKET_NAME: z.string().min(1),
     /** Public CDN URL for serving uploaded files */
     CDN_BASE_URL: z.string().url(),
 
@@ -51,6 +51,13 @@ const envSchema = z.object({
     // ── CORS ───────────────────────────────────────────────────────────────────
     /** Comma-separated list of allowed origins, e.g. "http://localhost:5173,https://chatapp.vercel.app" */
     CORS_ORIGINS: z.string().default('http://localhost:5173'),
+
+    // In your env.ts / config/env.ts, add these three fields
+    // alongside whatever is already there:
+
+    SUPABASE_URL: z.string().url(),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+    SUPABASE_BUCKET: z.string().min(1),
 });
 
 // =============================================================================
