@@ -37,13 +37,13 @@ function createRedisClient(name: string): Redis {
 export const redis = createRedisClient('main');
 
 /** Dedicated client for BullMQ worker (blocks the connection) */
-export const redisWorker = createRedisClient('bullmq-worker');
+export const redisWorker = redis;
 
 /** Dedicated pub client for Socket.io Redis adapter */
-export const redisPub = createRedisClient('socketio-pub');
+export const redisPub = redis;
 
 /** Dedicated sub client for Socket.io Redis adapter */
-export const redisSub = createRedisClient('socketio-sub');
+export const redisSub = redis;
 
 /**
  * Opens all Redis connections.
